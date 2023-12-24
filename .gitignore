@@ -1,0 +1,23 @@
+# ignore pycache directories
+__pycache__/
+
+# ignore .venv directory
+.venv/
+
+# ignore .vscode directory
+.vscode/
+
+# ignore model files
+static/models/*
+
+# ignore generated presentations
+static/presentations/*
+
+# ignore log files
+logs/*
+
+# ignore the .env file
+.env
+
+# exclude .gitkeep from being ignored
+!.gitkeep
