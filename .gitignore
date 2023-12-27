@@ -11,7 +11,7 @@ __pycache__/
 static/models/*
 
 # ignore generated presentations
-static/presentations/*
+media/presentations/*
 
 # ignore log files
 logs/*

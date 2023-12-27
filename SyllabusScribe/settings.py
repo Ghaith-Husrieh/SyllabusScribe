@@ -19,6 +19,9 @@ import os
 # Load environment variables
 load_dotenv()
 
+# Override base User model
+AUTH_USER_MODEL = 'Base.User'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -137,15 +140,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
-MEDIA_URL = 'images/'
-MEDIA_ROOT = BASE_DIR / 'static/images'
-MODELS_ROOT = BASE_DIR / 'static/models'
-PRESENTATIONS_ROOT = BASE_DIR / 'static/presentations'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+MODELS_ROOT = STATIC_ROOT / 'models'
+PRESENTATIONS_ROOT = MEDIA_ROOT / 'presentations'
 LOGS_ROOT = BASE_DIR / 'logs'
 
 # Default primary key field type
