@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from guidance import models, system, user, assistant, gen
@@ -14,6 +15,16 @@ from drf_yasg import openapi
 @swagger_auto_schema(
     method='POST',
     request_body=QuerySerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
     responses={
         status.HTTP_200_OK: openapi.Response(
             description='Successful operation',
@@ -56,9 +67,31 @@ from drf_yasg import openapi
                 },
             ),
         ),
+        status.HTTP_401_UNAUTHORIZED: openapi.Response(
+            description="Unauthorized",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'detail': openapi.Schema(type=openapi.TYPE_STRING),
+                    'code': openapi.Schema(type=openapi.TYPE_STRING),
+                    'messages': openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'token_class': openapi.Schema(type=openapi.TYPE_STRING),
+                                'token_type': openapi.Schema(type=openapi.TYPE_STRING),
+                                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                            },
+                        ),
+                    ),
+                },
+            ),
+        )
     },
 )
 @api_view(['POST'])
+@permission_classes((IsAuthenticated,))
 @log_api_view
 def llm_query(request):
     if llama2 is not None:
@@ -83,8 +116,18 @@ def llm_query(request):
 @swagger_auto_schema(
     method='POST',
     request_body=GeneratePresentationSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
     responses={
-        status.HTTP_200_OK: openapi.Response(
+        status.HTTP_201_CREATED: openapi.Response(
             description='Successful operation',
             schema=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
@@ -128,9 +171,31 @@ def llm_query(request):
                 },
             ),
         ),
+        status.HTTP_401_UNAUTHORIZED: openapi.Response(
+            description="Unauthorized",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'detail': openapi.Schema(type=openapi.TYPE_STRING),
+                    'code': openapi.Schema(type=openapi.TYPE_STRING),
+                    'messages': openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'token_class': openapi.Schema(type=openapi.TYPE_STRING),
+                                'token_type': openapi.Schema(type=openapi.TYPE_STRING),
+                                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                            },
+                        ),
+                    ),
+                },
+            ),
+        )
     },
 )
 @api_view(['POST'])
+@permission_classes((IsAuthenticated,))
 @log_api_view
 def llm_generate_presentation(request):
     if llama2 is not None:
@@ -145,12 +210,13 @@ def llm_generate_presentation(request):
             )
             presentation_contents = [generate_title_content(LLM, title)
                                      for title in presentation_titles]
-            generate_presentation(
+            generated_presentation = generate_presentation(
                 serializer.validated_data['topic'],
                 presentation_titles,
                 presentation_contents
             )
-            return Response({'model_output': f"Successfully generated '{serializer.validated_data['topic']}.pptx'"})
+            # TODO: Create 'LessonPresentation' record in database
+            return Response({'model_output': f"Successfully generated '{serializer.validated_data['topic']}.pptx'\nDownload URL: /media/presentations/{serializer.validated_data['topic']}.pptx"}, status.HTTP_201_CREATED)
         else:
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     else:

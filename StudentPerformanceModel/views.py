@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .utils.model_loader import student_performance_model
@@ -12,6 +13,16 @@ import pandas as pd
 @swagger_auto_schema(
     method='POST',
     request_body=StudentPerformanceSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
     responses={
         status.HTTP_200_OK: openapi.Response(
             description='Successful operation',
@@ -59,9 +70,31 @@ import pandas as pd
                 },
             ),
         ),
+        status.HTTP_401_UNAUTHORIZED: openapi.Response(
+            description="Unauthorized",
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'detail': openapi.Schema(type=openapi.TYPE_STRING),
+                    'code': openapi.Schema(type=openapi.TYPE_STRING),
+                    'messages': openapi.Schema(
+                        type=openapi.TYPE_ARRAY,
+                        items=openapi.Schema(
+                            type=openapi.TYPE_OBJECT,
+                            properties={
+                                'token_class': openapi.Schema(type=openapi.TYPE_STRING),
+                                'token_type': openapi.Schema(type=openapi.TYPE_STRING),
+                                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                            },
+                        ),
+                    ),
+                },
+            ),
+        )
     },
 )
 @api_view(['POST'])
+@permission_classes((IsAuthenticated,))
 @log_api_view
 def student_performance_model_query(request):
     if student_performance_model is not None:
