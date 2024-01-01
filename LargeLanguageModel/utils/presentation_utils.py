@@ -6,6 +6,7 @@ from pptx.util import Pt
 from pptx.dml.color import RGBColor
 from .prompt_constants import PRESENTATION_SYSTEM_PROMPT
 from decorators.log_decorators import log_function
+from io import BytesIO
 
 
 TITLE_FONT_SIZE = Pt(32)
@@ -82,4 +83,6 @@ def generate_presentation(topic, presentation_titles, presentation_contents):
         for paragraph in content.text_frame.paragraphs:
             paragraph.font.size = CONTENT_FONT_SIZE
 
-    powerpoint.save(str(settings.PRESENTATIONS_ROOT / f"{topic}.pptx"))
+    pptx_data = BytesIO()
+    powerpoint.save(pptx_data)
+    return pptx_data

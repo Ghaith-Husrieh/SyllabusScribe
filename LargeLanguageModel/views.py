@@ -10,6 +10,8 @@ from .serializers import QuerySerializer, GeneratePresentationSerializer
 from decorators.log_decorators import log_api_view
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from Base.models import LessonPresentation
+from django.core.files.base import ContentFile
 
 
 @swagger_auto_schema(
@@ -215,8 +217,14 @@ def llm_generate_presentation(request):
                 presentation_titles,
                 presentation_contents
             )
-            # TODO: Create 'LessonPresentation' record in database
-            return Response({'model_output': f"Successfully generated '{serializer.validated_data['topic']}.pptx'\nDownload URL: /media/presentations/{serializer.validated_data['topic']}.pptx"}, status.HTTP_201_CREATED)
+            LessonPresentation.objects.create(
+                topic=serializer.validated_data['topic'],
+                grade_level=serializer.validated_data['grade_level'],
+                generated_file=ContentFile(generated_presentation.getvalue(),
+                                           name=f"{serializer.validated_data['topic']}.pptx"),
+                user=request.user
+            )
+            return Response({'model_output': f"Successfully generated presentation for topic '{serializer.validated_data['topic']}'"}, status.HTTP_201_CREATED)
         else:
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     else:
