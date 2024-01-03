@@ -1,5 +1,5 @@
 from django.apps import AppConfig
-from .utils.model_loader import load_model
+from .utils.llama_interface import LlamaInterface
 
 
 class LargelanguagemodelConfig(AppConfig):
@@ -7,4 +7,4 @@ class LargelanguagemodelConfig(AppConfig):
     name = 'LargeLanguageModel'
 
     def ready(self):
-        load_model()
+        LlamaInterface.load_model()

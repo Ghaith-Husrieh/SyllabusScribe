@@ -2,10 +2,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from guidance import models, system, user, assistant, gen
-from .utils.model_loader import llama2
+from guidance import system, user, assistant, gen
 from .utils.presentation_utils import generate_presentation_titles, generate_title_content, generate_presentation
 from .utils.prompt_constants import DEFAULT_SYSTEM_PROMPT
+from .utils.llama_interface import LlamaInterface
 from .serializers import QuerySerializer, GeneratePresentationSerializer
 from decorators.log_decorators import log_api_view
 from drf_yasg.utils import swagger_auto_schema
@@ -96,8 +96,8 @@ from django.core.files.base import ContentFile
 @permission_classes((IsAuthenticated,))
 @log_api_view
 def llm_query(request):
-    if llama2 is not None:
-        LLM = models.LlamaCppChat(model=llama2)
+    LLM = LlamaInterface.create_local_instance()
+    if LLM is not None:
         serializer = QuerySerializer(data=request.data)
         if serializer.is_valid():
             user_input = serializer.validated_data['user_input']
@@ -200,8 +200,8 @@ def llm_query(request):
 @permission_classes((IsAuthenticated,))
 @log_api_view
 def llm_generate_presentation(request):
-    if llama2 is not None:
-        LLM = models.LlamaCppChat(model=llama2)
+    LLM = LlamaInterface.create_local_instance()
+    if LLM is not None:
         serializer = GeneratePresentationSerializer(data=request.data)
         if serializer.is_valid():
             presentation_titles = generate_presentation_titles(
