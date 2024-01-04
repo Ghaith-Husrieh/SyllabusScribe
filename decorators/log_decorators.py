@@ -1,5 +1,5 @@
 import logging
-from functools import wraps
+from functools import wraps, partial
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +36,19 @@ def log_api_view(view_func):
     return wrapper
 
 
-def log_function(func):
+def log_function(func=None, log_result=True):
+    if func == None:
+        return partial(log_function, log_result=log_result)
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         logger.info(f'Function {func.__name__} was called from {func.__module__}')
         try:
             result = func(*args, **kwargs)
-            logger.info(f'Function {func.__name__} finished execution | RESULT:{result}')
+            if log_result == True:
+                logger.info(f'Function {func.__name__} finished execution | RESULT:{result}')
+            else:
+                logger.info(f'Function {func.__name__} finished execution')
         except Exception as e:
             logger.exception(f'Function {func.__name__} raised and exception: {str(e)}')
             raise

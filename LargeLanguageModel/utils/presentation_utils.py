@@ -13,7 +13,7 @@ TITLE_FONT_SIZE = Pt(32)
 CONTENT_FONT_SIZE = Pt(16)
 
 
-@log_function
+@log_function(log_result=False)
 def generate_presentation_titles(model, num_slides, topic, grade_level):
     prompt = f"Generate {num_slides} short slide titles for the topic '{topic}' for {grade_level} students."
     with system():
@@ -29,7 +29,7 @@ def generate_presentation_titles(model, num_slides, topic, grade_level):
     return generated_titles
 
 
-@log_function
+@log_function(log_result=False)
 def generate_title_content(model, slide_title):
     prompt = f"Generate content for the slide: {slide_title}. The content must be in medium worded paragraphs. Only return 1 paragraph."
     with system():
@@ -43,7 +43,7 @@ def generate_title_content(model, slide_title):
     return generated_content
 
 
-@log_function
+@log_function(log_result=False)
 def generate_presentation(topic, presentation_titles, presentation_contents):
     powerpoint = Presentation()
 
