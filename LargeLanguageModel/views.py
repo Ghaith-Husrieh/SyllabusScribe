@@ -135,8 +135,11 @@ def llm_query(request):
                 type=openapi.TYPE_OBJECT,
                 properties={
                     'model_output': openapi.Schema(
-                        type=openapi.TYPE_STRING,
-                        default="Successfully generated 'topic_name.pptx'"
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'message': openapi.Schema(type=openapi.TYPE_STRING),
+                            'file_path': openapi.Schema(type=openapi.TYPE_STRING)
+                        }
                     )
                 }
             )
@@ -217,14 +220,18 @@ def llm_generate_presentation(request):
                 presentation_titles,
                 presentation_contents
             )
-            LessonPresentation.objects.create(
+            lesson_presentation_object = LessonPresentation.objects.create(
                 topic=serializer.validated_data['topic'],
                 grade_level=serializer.validated_data['grade_level'],
                 generated_file=ContentFile(generated_presentation.getvalue(),
                                            name=f"{serializer.validated_data['topic']}.pptx"),
                 user=request.user
             )
-            return Response({'model_output': f"Successfully generated presentation for topic '{serializer.validated_data['topic']}'"}, status.HTTP_201_CREATED)
+            return Response({'model_output': {
+                'message': 'Presentation generated successfully',
+                'file_path': f'{lesson_presentation_object.generated_file}'
+            }
+            }, status.HTTP_201_CREATED)
         else:
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     else:
