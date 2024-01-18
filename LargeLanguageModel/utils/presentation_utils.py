@@ -7,6 +7,8 @@ from pptx.dml.color import RGBColor
 from .prompt_constants import PRESENTATION_SYSTEM_PROMPT
 from decorators.log_decorators import log_function
 from io import BytesIO
+from uuid import uuid4
+from django.core.files.base import ContentFile
 
 
 TITLE_FONT_SIZE = Pt(32)
@@ -85,4 +87,7 @@ def generate_presentation(topic, presentation_titles, presentation_contents):
 
     pptx_data = BytesIO()
     powerpoint.save(pptx_data)
-    return pptx_data
+    unique_identifier = str(uuid4())
+    file_name = f"{topic}_{unique_identifier[:8]}.pptx"
+
+    return ContentFile(pptx_data.getvalue(), name=file_name)

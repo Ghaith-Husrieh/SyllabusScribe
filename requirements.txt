@@ -14,9 +14,12 @@ diskcache==5.6.3
 distro==1.8.0
 Django==4.2.6
 django-cors-headers==4.3.0
+django-extensions==3.2.3
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.0
 drf-yasg==1.21.7
+factory-boy==3.3.0
+Faker==22.2.0
 frozenlist==1.4.0
 gptcache==0.1.43
 guidance==0.1.5
