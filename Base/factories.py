@@ -1,29 +1,17 @@
-from factory import (
-    Faker,
-    Factory,
-    SubFactory,
-    RelatedFactory,
-    RelatedFactoryList,
-    lazy_attribute
-)
-from factory.django import DjangoModelFactory
-from .models import (
-    User,
-    Subject,
-    LessonPlan,
-    LessonContext,
-    LessonPresentation,
-    LessonHandout,
-    LessonQuiz,
-    QuizQA,
-    Unit
-)
-from django.contrib.auth.hashers import make_password
-from factory.faker import faker
-from django.core.files.base import ContentFile
-from pptx import Presentation
 from io import BytesIO
 from uuid import uuid4
+
+from django.contrib.auth.hashers import make_password
+from django.core.files.base import ContentFile
+from factory import (Factory, Faker, RelatedFactory, RelatedFactoryList,
+                     SubFactory, lazy_attribute)
+from factory.django import DjangoModelFactory
+from factory.faker import faker
+from pptx import Presentation
+
+from .models import (LessonContext, LessonHandout, LessonPlan,
+                     LessonPresentation, LessonQuiz, QuizQA, Subject, Unit,
+                     User)
 
 FAKE = faker.Faker()
 

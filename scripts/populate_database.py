@@ -5,16 +5,10 @@ python manage.py runscript -v3 populate_database
 This script populates the database with sample data using Factory Boy factories.
 """
 
-from Base.factories import (
-    UserFactory,
-    SubjectFactory,
-    LessonPlanFactory,
-    LessonContextFactory,
-    LessonPresentationFactory,
-    LessonHandoutFactory,
-    LessonQuizFactory,
-    UnitFactory
-)
+from Base.factories import (LessonContextFactory, LessonHandoutFactory,
+                            LessonPlanFactory, LessonPresentationFactory,
+                            LessonQuizFactory, SubjectFactory, UnitFactory,
+                            UserFactory)
 from Base.models import User
 
 

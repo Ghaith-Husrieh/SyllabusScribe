@@ -1,13 +1,15 @@
+import pandas as pd
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
-from .utils.model_loader import student_performance_model
-from .serializers import StudentPerformanceSerializer
+
 from decorators.log_decorators import log_api_view
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-import pandas as pd
+
+from .serializers import StudentPerformanceSerializer
+from .utils.model_loader import student_performance_model
 
 
 @swagger_auto_schema(

@@ -1,8 +1,10 @@
-from llama_cpp import Llama
-from django.conf import settings
-from decorators.log_decorators import log_function
-from guidance.models import LlamaCppChat
 from enum import Enum
+
+from django.conf import settings
+from guidance.models import LlamaCppChat
+from llama_cpp import Llama
+
+from decorators.log_decorators import log_function
 
 
 class OperationResult(Enum):

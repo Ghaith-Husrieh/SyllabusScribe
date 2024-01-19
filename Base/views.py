@@ -1,11 +1,13 @@
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework import status
-from .serializers import SignUpSerializer
-from decorators.log_decorators import log_api_view
-from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+from decorators.log_decorators import log_api_view
+
+from .serializers import SignUpSerializer
 
 
 @swagger_auto_schema(

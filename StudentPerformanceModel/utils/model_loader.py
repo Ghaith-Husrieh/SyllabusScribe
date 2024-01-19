@@ -1,6 +1,7 @@
-from decorators.log_decorators import log_function
-from joblib import load
 from django.conf import settings
+from joblib import load
+
+from decorators.log_decorators import log_function
 
 student_performance_model = None
 

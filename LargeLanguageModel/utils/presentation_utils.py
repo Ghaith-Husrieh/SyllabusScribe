@@ -1,15 +1,16 @@
 import re
-from django.conf import settings
-from guidance import system, user, assistant, gen
-from pptx import Presentation
-from pptx.util import Pt
-from pptx.dml.color import RGBColor
-from .prompt_constants import PRESENTATION_SYSTEM_PROMPT
-from decorators.log_decorators import log_function
 from io import BytesIO
 from uuid import uuid4
-from django.core.files.base import ContentFile
 
+from django.core.files.base import ContentFile
+from guidance import assistant, gen, system, user
+from pptx import Presentation
+from pptx.dml.color import RGBColor
+from pptx.util import Pt
+
+from decorators.log_decorators import log_function
+
+from .prompt_constants import PRESENTATION_SYSTEM_PROMPT
 
 TITLE_FONT_SIZE = Pt(32)
 CONTENT_FONT_SIZE = Pt(16)

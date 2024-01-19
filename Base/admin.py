@@ -1,15 +1,8 @@
 from django.contrib import admin
-from .models import (
-    User,
-    Subject,
-    Unit,
-    LessonPlan,
-    LessonContext,
-    LessonPresentation,
-    LessonHandout,
-    LessonQuiz,
-    QuizQA
-)
+
+from .models import (LessonContext, LessonHandout, LessonPlan,
+                     LessonPresentation, LessonQuiz, QuizQA, Subject, Unit,
+                     User)
 
 # Register your models here.
 admin.site.register(User)

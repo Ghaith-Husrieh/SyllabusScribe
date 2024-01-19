@@ -1,5 +1,5 @@
 import logging
-from functools import wraps, partial
+from functools import partial, wraps
 
 logger = logging.getLogger(__name__)
 

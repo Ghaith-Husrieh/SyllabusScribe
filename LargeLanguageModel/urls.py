@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views
 
+from . import views
 
 urlpatterns = [
     path('query/', views.llm_query, name="llm_query"),

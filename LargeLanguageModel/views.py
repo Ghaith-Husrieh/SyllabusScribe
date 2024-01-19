@@ -1,16 +1,20 @@
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from guidance import assistant, gen, system, user
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
-from guidance import system, user, assistant, gen
-from .utils.presentation_utils import generate_presentation_titles, generate_title_content, generate_presentation
-from .utils.prompt_constants import DEFAULT_SYSTEM_PROMPT
-from .utils.llama_interface import LlamaInterface
-from .serializers import QuerySerializer, GeneratePresentationSerializer
-from decorators.log_decorators import log_api_view
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+
 from Base.models import LessonPresentation
+from decorators.log_decorators import log_api_view
+
+from .serializers import GeneratePresentationSerializer, QuerySerializer
+from .utils.llama_interface import LlamaInterface
+from .utils.presentation_utils import (generate_presentation,
+                                       generate_presentation_titles,
+                                       generate_title_content)
+from .utils.prompt_constants import DEFAULT_SYSTEM_PROMPT
 
 
 @swagger_auto_schema(
@@ -212,8 +216,7 @@ def llm_generate_presentation(request):
                 serializer.validated_data['topic'],
                 serializer.validated_data['grade_level']
             )
-            presentation_contents = [generate_title_content(LLM, title)
-                                     for title in presentation_titles]
+            presentation_contents = [generate_title_content(LLM, title) for title in presentation_titles]
             generated_presentation = generate_presentation(
                 serializer.validated_data['topic'],
                 presentation_titles,
