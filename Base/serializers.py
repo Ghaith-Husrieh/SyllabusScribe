@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import User
+from .models import (LessonContext, LessonHandout, LessonPlan,
+                     LessonPresentation, LessonQuiz, QuizQA, Subject, User)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -39,3 +39,52 @@ class SignUpSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'is_staff',
+                  'is_active', 'date_joined', 'email', 'bio', 'avatar']
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        exclude = ['user']
+
+
+class LessonPlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonPlan
+        exclude = ['user']
+
+
+class LessonContextSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonContext
+        exclude = ['user']
+
+
+class LessonPresentationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonPresentation
+        exclude = ['user']
+
+
+class LessonHandoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonHandout
+        exclude = ['user']
+
+
+class LessonQuizSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonQuiz
+        exclude = ['user']
+
+
+class QuizQASerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizQA
+        exclude = ['lesson_quiz']

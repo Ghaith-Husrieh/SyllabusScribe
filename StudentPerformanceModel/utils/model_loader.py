@@ -6,7 +6,7 @@ from decorators.log_decorators import log_function
 student_performance_model = None
 
 
-@log_function
+@log_function(log_result=False)
 def load_model():
     global student_performance_model
     model_path = str(settings.MODELS_ROOT / 'student_performance_ML.joblib')
