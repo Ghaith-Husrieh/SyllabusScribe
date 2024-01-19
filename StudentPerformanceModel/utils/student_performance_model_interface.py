@@ -1,8 +1,7 @@
 from enum import Enum
 
 from django.conf import settings
-from guidance.models import LlamaCppChat
-from llama_cpp import Llama
+from joblib import load
 
 from decorators.log_decorators import log_function
 
@@ -13,16 +12,15 @@ class OperationResult(Enum):
     MODEL_ALREADY_LOADED = 3
 
 
-class LlamaInterface:
-    _llm = None
+class StudentPerformanceModelInterface:
+    _model = None
 
     @classmethod
     @log_function
     def load_model(cls):
-        if cls._llm is None:
+        if cls._model is None:
             try:
-                cls._llm = Llama(model_path=str(settings.MODELS_ROOT / 'llama-2-7b-chat.Q8_0.gguf'),
-                                 n_ctx=4096, n_gpu_layers=32, verbose=True)
+                cls._model = load(str(settings.MODELS_ROOT / 'student_performance_ML.joblib'))
                 return OperationResult.SUCCESS
             except Exception as e:
                 return OperationResult.FAILURE
@@ -31,8 +29,5 @@ class LlamaInterface:
 
     @classmethod
     @log_function(log_result=False)
-    def create_local_instance(cls):
-        if cls._llm is not None:
-            return LlamaCppChat(model=cls._llm)
-        else:
-            return None
+    def get_model(cls):
+        return cls._model

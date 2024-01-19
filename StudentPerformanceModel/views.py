@@ -9,7 +9,8 @@ from rest_framework.response import Response
 from decorators.log_decorators import log_api_view
 
 from .serializers import StudentPerformanceSerializer
-from .utils.model_loader import student_performance_model
+from .utils.student_performance_model_interface import \
+    StudentPerformanceModelInterface
 
 
 @swagger_auto_schema(
@@ -99,6 +100,7 @@ from .utils.model_loader import student_performance_model
 @permission_classes((IsAuthenticated,))
 @log_api_view
 def student_performance_model_query(request):
+    student_performance_model = StudentPerformanceModelInterface.get_model()
     if student_performance_model is not None:
         serializer = StudentPerformanceSerializer(data=request.data)
         if serializer.is_valid():

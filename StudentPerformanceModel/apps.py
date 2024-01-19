@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
-from .utils.model_loader import load_model
+from .utils.student_performance_model_interface import \
+    StudentPerformanceModelInterface
 
 
 class StudentperformancemodelConfig(AppConfig):
@@ -8,4 +9,4 @@ class StudentperformancemodelConfig(AppConfig):
     name = 'StudentPerformanceModel'
 
     def ready(self):
-        load_model()
+        StudentPerformanceModelInterface.load_model()
