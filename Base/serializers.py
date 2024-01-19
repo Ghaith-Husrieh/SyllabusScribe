@@ -40,6 +40,20 @@ class SignUpSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+
+        validation_errors = {}
+        if User.objects.filter(username=username).exists():
+            validation_errors.update({"username": "A user with this username already exists."})
+        if User.objects.filter(email=email).exists():
+            validation_errors.update({"email": "A user with this email already exists."})
+        if validation_errors:
+            raise serializers.ValidationError(validation_errors)
+
+        return data
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
