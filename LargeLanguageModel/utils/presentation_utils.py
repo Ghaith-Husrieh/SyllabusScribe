@@ -10,7 +10,7 @@ from pptx.util import Pt
 
 from decorators.log_decorators import log_function
 
-from .prompt_constants import PRESENTATION_SYSTEM_PROMPT
+from .prompt_constants import SystemPrompt
 
 TITLE_FONT_SIZE = Pt(32)
 CONTENT_FONT_SIZE = Pt(16)
@@ -20,12 +20,12 @@ CONTENT_FONT_SIZE = Pt(16)
 def generate_presentation_titles(model, num_slides, topic, grade_level):
     prompt = f"Generate {num_slides} short slide titles for the topic '{topic}' for {grade_level} students."
     with system():
-        model += PRESENTATION_SYSTEM_PROMPT
+        model += SystemPrompt.PRESENTATION.value
     with user():
         model += prompt
     with assistant():
         model += f"here are {num_slides} potential slide titles for a presentation on '{topic}' for {grade_level} students:\n" + \
-            gen("output", max_tokens=2048, temperature=0.0, top_p=0.1, stop="\n\n")
+            gen("output", max_tokens=2048, temperature=0.0, stop="\n\n")
     generated_titles = model["output"].split("\n")
     for index, title in enumerate(generated_titles):
         generated_titles[index] = re.sub(r'[\d.\"]', '', title)
@@ -36,12 +36,12 @@ def generate_presentation_titles(model, num_slides, topic, grade_level):
 def generate_title_content(model, slide_title):
     prompt = f"Generate content for the slide: {slide_title}. The content must be in medium worded paragraphs. Only return 1 paragraph."
     with system():
-        model += PRESENTATION_SYSTEM_PROMPT
+        model += SystemPrompt.PRESENTATION.value
     with user():
         model += prompt
     with assistant():
         model += f"here is a paragraph of content for a slide on '{slide_title}':\n" + \
-            gen("output", max_tokens=320, temperature=0.0, top_p=0.1)
+            gen("output", max_tokens=320, temperature=0.0)
     generated_content = re.sub(r'[\"]', '', model["output"])
     return generated_content
 
