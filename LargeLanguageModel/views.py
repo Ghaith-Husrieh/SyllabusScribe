@@ -11,12 +11,15 @@ from Base.models import LessonPlan, LessonPresentation
 from decorators.log_decorators import log_api_view
 
 from .serializers import (GenerateLessonPlanSerializer,
+                          GenerateLessonQuizSerializer,
                           GeneratePresentationSerializer, QuerySerializer)
 from .utils.llama_interface import LlamaInterface
 from .utils.presentation_utils import (generate_presentation,
                                        generate_presentation_titles,
                                        generate_title_content)
 from .utils.prompt_constants import SystemPrompt
+from .utils.quiz_utils import (generate_answer, generate_questions,
+                               generate_quiz)
 
 
 @swagger_auto_schema(
@@ -282,6 +285,45 @@ def llm_generate_lesson_plan(request):
             return Response({'model_output': {
                 'message': 'Lesson plan generated successfully',
                 'generated_content': lesson_plan_object.content
+            }
+            }, status.HTTP_201_CREATED)
+        else:
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error': 'Model currently offline'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+# TODO: Add responses to swagger schema
+@swagger_auto_schema(
+    method='POST',
+    request_body=GenerateLessonQuizSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@log_api_view
+def llm_generate_quiz(request):
+    LLM = LlamaInterface.create_local_instance()
+    if isinstance(LLM, LlamaCppChat):
+        serializer = GenerateLessonQuizSerializer(data=request.data)
+        if serializer.is_valid():
+            topic = serializer.validated_data['topic']
+            grade_level = serializer.validated_data['grade_level']
+            # TODO: Let the user specify the num_questions
+            questions_list = generate_questions(LLM, topic, grade_level, 5)
+            answers_list = [generate_answer(LLM, question) for question in questions_list]
+            generate_quiz(request.user, topic, grade_level, questions_list, answers_list)
+            return Response({'model_output': {
+                'message': 'Quiz generated successfully'
             }
             }, status.HTTP_201_CREATED)
         else:
