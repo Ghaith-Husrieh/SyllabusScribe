@@ -1,3 +1,4 @@
+import random
 from io import BytesIO
 from uuid import uuid4
 
@@ -138,14 +139,16 @@ class _QuizQAFactory(DjangoModelFactory):
     class Meta:
         model = QuizQA
 
-    question = Faker('sentence', nb_words=6)
+    @lazy_attribute
+    def question(self):
+        generated_question = FAKE.sentence(nb_words=6)
+        for i in ['a', 'b', 'c', 'd']:
+            generated_question += f"\n{i}) {FAKE.sentence(nb_words=6)}"
+        return generated_question
 
     @lazy_attribute
     def answer(self):
-        mcq = f"1. {FAKE.sentence(nb_words=6)}"
-        for i in range(1, 4):
-            mcq += f"\n{i+1}. {FAKE.sentence(nb_words=6)}"
-        return mcq
+        return f"{random.choice(['a', 'b', 'c', 'd'])}) {FAKE.sentence(nb_words=6)}"
 
 
 class LessonQuizFactory(DjangoModelFactory):
