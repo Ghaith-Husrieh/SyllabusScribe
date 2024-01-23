@@ -8,7 +8,8 @@ from rest_framework.response import Response
 
 from decorators.log_decorators import log_api_view
 
-from .serializers import StudentPerformanceSerializer
+from .serializers import (PerformanceIndexSerializer,
+                          StudentPerformanceSerializer)
 from .utils.student_performance_model_interface import \
     StudentPerformanceModelInterface
 
@@ -74,7 +75,7 @@ from .utils.student_performance_model_interface import \
             ),
         ),
         status.HTTP_401_UNAUTHORIZED: openapi.Response(
-            description="Unauthorized",
+            description='Unauthorized',
             schema=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
                 properties={
@@ -91,6 +92,18 @@ from .utils.student_performance_model_interface import \
                             },
                         ),
                     ),
+                },
+            ),
+        ),
+        status.HTTP_500_INTERNAL_SERVER_ERROR: openapi.Response(
+            description='Internal Server Error',
+            schema=openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'error': openapi.Schema(
+                        type=openapi.TYPE_STRING,
+                        default='Something went wrong'
+                    )
                 },
             ),
         )
@@ -116,7 +129,11 @@ def student_performance_model_query(request):
                          'Sleep Hours', 'Sample Question Papers Practiced']
             )
             performance_index = student_performance_model.predict(model_input)
-            return Response({'model_output': {'performance_index': performance_index[0]}}, status=status.HTTP_200_OK)
+            output_serializer = PerformanceIndexSerializer(data={'performance_index': performance_index[0]})
+            if output_serializer.is_valid():
+                return Response({'model_output': {'performance_index': output_serializer.validated_data['performance_index']}}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Something went wrong'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
     else:
