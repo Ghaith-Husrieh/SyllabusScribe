@@ -14,5 +14,10 @@ urlpatterns = [
     path('user/lesson-contexts', views.get_user_lesson_contexts, name='get_user_lesson_contexts'),
     path('user/lesson-presentations', views.get_user_lesson_presentations, name='get_user_lesson_presentations'),
     path('user/lesson-handouts', views.get_user_lesson_handouts, name='get_user_lesson_handouts'),
-    path('user/lesson-quizzes', views.get_user_lesson_quizzes, name='get_user_lesson_quizzes')
+    path('user/lesson-quizzes', views.get_user_lesson_quizzes, name='get_user_lesson_quizzes'),
+    path('lesson-plan/<str:pk>', views.get_lesson_plan, name='get_lesson_plan'),
+    path('lesson-context/<str:pk>', views.get_lesson_context, name='get_lesson_context'),
+    path('lesson-presentation/<str:pk>', views.get_lesson_presentation, name='get_lesson_presentation'),
+    path('lesson-handout/<str:pk>', views.get_lesson_handout, name='get_lesson_handout'),
+    path('lesson-quiz/<str:pk>', views.get_lesson_quiz, name='get_lesson_quiz')
 ]
