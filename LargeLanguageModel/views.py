@@ -7,10 +7,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from Base.models import LessonPlan, LessonPresentation
+from Base.models import LessonContext, LessonPlan, LessonPresentation
 from decorators.log_decorators import log_api_view
 
-from .serializers import (GenerateLessonPlanSerializer,
+from .serializers import (GenerateLessonContextSerializer,
+                          GenerateLessonPlanSerializer,
                           GenerateLessonQuizSerializer,
                           GeneratePresentationSerializer, QuerySerializer)
 from .utils.llama_interface import LlamaInterface
@@ -20,6 +21,7 @@ from .utils.presentation_utils import (generate_presentation,
 from .utils.prompt_constants import SystemPrompt
 from .utils.quiz_utils import (generate_answer, generate_questions,
                                generate_quiz)
+from .utils.text_processing import extract_list
 
 
 @swagger_auto_schema(
@@ -324,6 +326,57 @@ def llm_generate_quiz(request):
             generate_quiz(request.user, topic, grade_level, questions_list, answers_list)
             return Response({'model_output': {
                 'message': 'Quiz generated successfully'
+            }
+            }, status.HTTP_201_CREATED)
+        else:
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error': 'Model currently offline'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+# TODO: Add responses to swagger schema
+@swagger_auto_schema(
+    method='POST',
+    request_body=GenerateLessonContextSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@log_api_view
+def llm_generate_context(request):
+    LLM = LlamaInterface.create_local_instance()
+    if isinstance(LLM, LlamaCppChat):
+        serializer = GenerateLessonContextSerializer(data=request.data)
+        if serializer.is_valid():
+            topic = serializer.validated_data['topic']
+            grade_level = serializer.validated_data['grade_level']
+            prompt = f"Generate a list of terms that might arise when teaching about the topic of '{topic}' for {grade_level} students."
+            with system():
+                LLM += SystemPrompt.CONTEXT.value
+            with user():
+                LLM += prompt
+            with assistant():
+                LLM += "Here are some terms that might arise when teaching this topic:\n" + \
+                    gen('model_output', max_tokens=4096, temperature=0.0)
+            extracted_list = extract_list(LLM['model_output'])
+            lesson_context_object = LessonContext.objects.create(
+                topic=topic,
+                grade_level=grade_level,
+                content=extracted_list,
+                user=request.user
+            )
+            return Response({'model_output': {
+                'message': 'Context generated successfully',
+                'generated_content': lesson_context_object.content
             }
             }, status.HTTP_201_CREATED)
         else:

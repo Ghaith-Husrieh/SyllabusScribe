@@ -19,3 +19,8 @@ class GenerateLessonPlanSerializer(serializers.Serializer):
 class GenerateLessonQuizSerializer(serializers.Serializer):
     topic = serializers.CharField(max_length=128, required=True)
     grade_level = serializers.CharField(max_length=64, required=True)
+
+
+class GenerateLessonContextSerializer(serializers.Serializer):
+    topic = serializers.CharField(max_length=128, required=True)
+    grade_level = serializers.CharField(max_length=64, required=True)

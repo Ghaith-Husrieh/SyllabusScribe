@@ -21,7 +21,7 @@ def generate_questions(model, topic, grade_level, num_questions):
 
 @log_function(log_result=False)
 def generate_answer(model, question):
-    prompt = f"Answer the following questions MCQ question: {question}. Don't explain the answer. Only Choose one of the given options."
+    prompt = f"Answer the following MCQ question: {question}. Don't explain the answer. Only Choose one of the given options."
     with system():
         model += SystemPrompt.QUIZ.value
     with user():

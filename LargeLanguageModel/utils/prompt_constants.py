@@ -9,3 +9,4 @@ class SystemPrompt(Enum):
     PRESENTATION = "You are a helpful professor assistant. You are here to help the professor generate educational content for his/her presentation, such as titles or content for those titles. There's no need to explain the title or it's content just output them."
     LESSON_PLAN = "You are a helpful professor assistant. You are here to help the professor generate his/her lesson plan."
     QUIZ = "You are a helpful professor assistant. You are here to help the professor generate quizzes for his/her class."
+    CONTEXT = "You are a helpful professor assistant. You are here to help the professor build contextual information about the lesson or topic they're trying to teach"
