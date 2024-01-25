@@ -9,7 +9,8 @@ from decorators.log_decorators import log_api_view
 
 from .models import (LessonContext, LessonHandout, LessonPlan,
                      LessonPresentation, LessonQuiz, Subject)
-from .serializers import (LessonContextSerializer, LessonHandoutSerializer,
+from .serializers import (ChangePasswordSerializer, EditUserSerializer,
+                          LessonContextSerializer, LessonHandoutSerializer,
                           LessonPlanSerializer, LessonPresentationSerializer,
                           LessonQuizSerializer, QuizQASerializer,
                           SignUpSerializer, SubjectSerializer, UserSerializer)
@@ -63,7 +64,7 @@ def signup(request):
         serializer.save()
         return Response(serializer.data, status.HTTP_201_CREATED)
     else:
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+        return Response({'error': serializer.errors}, status.HTTP_400_BAD_REQUEST)
 
 
 @swagger_auto_schema(
@@ -476,3 +477,57 @@ def get_lesson_quiz(request, pk):
         return Response({'lesson_quiz': serialized_lesson_quiz}, status.HTTP_200_OK)
     else:
         return Response({'error': 'Unauthorized access to content'}, status.HTTP_403_FORBIDDEN)
+
+
+# TODO: Add responses to swagger schema
+@swagger_auto_schema(
+    method='PUT',
+    request_body=EditUserSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
+)
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+@log_api_view
+def edit_personal_info(request):
+    serializer = EditUserSerializer(instance=request.user, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'User updated successfully'}, status.HTTP_200_OK)
+    else:
+        return Response({'error': serializer.errors}, status.HTTP_400_BAD_REQUEST)
+
+
+# TODO: Add responses to swagger schema
+@swagger_auto_schema(
+    method='PUT',
+    request_body=ChangePasswordSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
+)
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+@log_api_view
+def change_password(request):
+    serializer = ChangePasswordSerializer(instance=request.user, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'Password changed successfully'}, status.HTTP_200_OK)
+    else:
+        return Response({'error': serializer.errors}, status.HTTP_400_BAD_REQUEST)

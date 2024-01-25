@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -102,3 +103,33 @@ class QuizQASerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizQA
         exclude = ['lesson_quiz']
+
+
+class EditUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'email', 'bio', 'avatar']
+
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+
+        validation_errors = {}
+        if User.objects.filter(username=username).exists() and self.instance.username != username:
+            validation_errors.update({"username": "A user with this username already exists."})
+        if User.objects.filter(email=email).exists() and self.instance.email != email:
+            validation_errors.update({"email": "A user with this email already exists."})
+        if validation_errors:
+            raise serializers.ValidationError(validation_errors)
+
+        return data
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['password']
+
+    def update(self, instance, validated_data):
+        validated_data['password'] = make_password(validated_data['password'])
+        return super().update(instance, validated_data)

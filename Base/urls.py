@@ -19,5 +19,7 @@ urlpatterns = [
     path('lesson-context/<str:pk>', views.get_lesson_context, name='get_lesson_context'),
     path('lesson-presentation/<str:pk>', views.get_lesson_presentation, name='get_lesson_presentation'),
     path('lesson-handout/<str:pk>', views.get_lesson_handout, name='get_lesson_handout'),
-    path('lesson-quiz/<str:pk>', views.get_lesson_quiz, name='get_lesson_quiz')
+    path('lesson-quiz/<str:pk>', views.get_lesson_quiz, name='get_lesson_quiz'),
+    path('user/edit-info', views.edit_personal_info, name='edit_user'),
+    path('user/change-password', views.change_password, name='change_password')
 ]
