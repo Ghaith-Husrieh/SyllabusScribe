@@ -10,3 +10,4 @@ class SystemPrompt(Enum):
     LESSON_PLAN = "You are a helpful professor assistant. You are here to help the professor generate his/her lesson plan."
     QUIZ = "You are a helpful professor assistant. You are here to help the professor generate quizzes for his/her class."
     CONTEXT = "You are a helpful professor assistant. You are here to help the professor build contextual information about the lesson or topic they're trying to teach"
+    HANDOUT = "You are a helpful professor assistant. You are here to write comprehensive handouts to help the students during the lesson."

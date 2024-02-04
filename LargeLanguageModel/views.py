@@ -7,10 +7,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from Base.models import LessonContext, LessonPlan, LessonPresentation
+from Base.models import (LessonContext, LessonHandout, LessonPlan,
+                         LessonPresentation)
 from decorators.log_decorators import log_api_view
 
 from .serializers import (GenerateLessonContextSerializer,
+                          GenerateLessonHandoutSerializer,
                           GenerateLessonPlanSerializer,
                           GenerateLessonQuizSerializer,
                           GeneratePresentationSerializer, QuerySerializer)
@@ -410,6 +412,62 @@ def llm_generate_context(request):
             return Response({'model_output': {
                 'message': 'Context generated successfully',
                 'generated_content': lesson_context_object.content
+            }
+            }, status.HTTP_201_CREATED)
+        else:
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error': 'Model currently offline'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+# TODO: Add responses to swagger schema
+@swagger_auto_schema(
+    method='POST',
+    request_body=GenerateLessonHandoutSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@log_api_view
+def llm_generate_handout(request):
+    LLM = LlamaInterface.create_local_instance()
+    if isinstance(LLM, LlamaCppChat):
+        serializer = GenerateLessonHandoutSerializer(data=request.data)
+        if serializer.is_valid():
+            topic = serializer.validated_data['topic']
+            grade_level = serializer.validated_data['grade_level']
+            if ToxicityModelInterface.is_loaded():
+                is_toxic = ToxicityModelInterface.predict_toxicity(topic)
+                if is_toxic:
+                    return Response({'error': 'Toxic or unethical input'}, status.HTTP_422_UNPROCESSABLE_ENTITY)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            prompt = f"Generate a handout with 5 sections for the topic '{topic}' for {grade_level} students to support and enhance their learning experience. Each section should have actual content such as short definitions and explanations not just bullet points. Use roman numbering. End with the symbol '#'."
+            with system():
+                LLM += SystemPrompt.HANDOUT.value
+            with user():
+                LLM += prompt
+            with assistant():
+                LLM += f"Here is a comprehensive handout that might support and enhance the learning experience of students:\n\n" + \
+                    gen('output', max_tokens=4096, temperature=0.0, stop='#')
+            lesson_handout_object = LessonHandout.objects.create(
+                topic=topic,
+                grade_level=grade_level,
+                content=LLM['output'],
+                user=request.user
+            )
+            return Response({'model_output': {
+                'message': 'Handout generated successfully',
+                'generated_content': lesson_handout_object.content
             }
             }, status.HTTP_201_CREATED)
         else:
