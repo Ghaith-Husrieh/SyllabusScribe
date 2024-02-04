@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 from .utils.llama_interface import LlamaInterface
+from .utils.toxicity_model_interface import ToxicityModelInterface
 
 
 class LargelanguagemodelConfig(AppConfig):
@@ -9,3 +10,4 @@ class LargelanguagemodelConfig(AppConfig):
 
     def ready(self):
         LlamaInterface.load_model()
+        ToxicityModelInterface.load_model(device='cuda')

@@ -22,6 +22,9 @@ from .utils.prompt_constants import SystemPrompt
 from .utils.quiz_utils import (generate_answer, generate_questions,
                                generate_quiz)
 from .utils.text_processing import extract_list
+from .utils.toxicity_model_interface import ToxicityModelInterface
+
+# TODO: document 500 and 422 responses for all api views
 
 
 @swagger_auto_schema(
@@ -111,6 +114,12 @@ def llm_query(request):
         serializer = QuerySerializer(data=request.data)
         if serializer.is_valid():
             user_input = serializer.validated_data['user_input']
+            if ToxicityModelInterface.is_loaded():
+                is_toxic = ToxicityModelInterface.predict_toxicity(user_input)
+                if is_toxic:
+                    return Response({'error': 'Toxic or unethical input'}, status.HTTP_422_UNPROCESSABLE_ENTITY)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             with system():
                 LLM += SystemPrompt.DEFAULT.value
             with user():
@@ -216,6 +225,12 @@ def llm_generate_presentation(request):
     if isinstance(LLM, LlamaCppChat):
         serializer = GeneratePresentationSerializer(data=request.data)
         if serializer.is_valid():
+            if ToxicityModelInterface.is_loaded():
+                is_toxic = ToxicityModelInterface.predict_toxicity(serializer.validated_data['topic'])
+                if is_toxic:
+                    return Response({'error': 'Toxic or unethical input'}, status.HTTP_422_UNPROCESSABLE_ENTITY)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             presentation_titles = generate_presentation_titles(
                 LLM,
                 serializer.validated_data['num_slides'],
@@ -270,6 +285,12 @@ def llm_generate_lesson_plan(request):
         if serializer.is_valid():
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
+            if ToxicityModelInterface.is_loaded():
+                is_toxic = ToxicityModelInterface.predict_toxicity(topic)
+                if is_toxic:
+                    return Response({'error': 'Toxic or unethical input'}, status.HTTP_422_UNPROCESSABLE_ENTITY)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             prompt = f"Generate a lesson plan for the topic '{topic}' for {grade_level} students. It should contain the following: Aim, Objectives, Possible Materials Needed, Lesson Flow, Modeled Practice, Guided Practice, Independent Practice, Common Areas of Struggle, Closure. Use roman numbering and decimal numbering for sub headings"
             with system():
                 LLM += SystemPrompt.LESSON_PLAN.value
@@ -320,6 +341,12 @@ def llm_generate_quiz(request):
         if serializer.is_valid():
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
+            if ToxicityModelInterface.is_loaded():
+                is_toxic = ToxicityModelInterface.predict_toxicity(topic)
+                if is_toxic:
+                    return Response({'error': 'Toxic or unethical input'}, status.HTTP_422_UNPROCESSABLE_ENTITY)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             # TODO: Let the user specify the num_questions
             questions_list = generate_questions(LLM, topic, grade_level, 5)
             answers_list = [generate_answer(LLM, question) for question in questions_list]
@@ -359,6 +386,12 @@ def llm_generate_context(request):
         if serializer.is_valid():
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
+            if ToxicityModelInterface.is_loaded():
+                is_toxic = ToxicityModelInterface.predict_toxicity(topic)
+                if is_toxic:
+                    return Response({'error': 'Toxic or unethical input'}, status.HTTP_422_UNPROCESSABLE_ENTITY)
+            else:
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             prompt = f"Generate a list of terms that might arise when teaching about the topic of '{topic}' for {grade_level} students."
             with system():
                 LLM += SystemPrompt.CONTEXT.value
