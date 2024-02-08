@@ -45,3 +45,4 @@ def generate_quiz(user, topic, grade_level, questions_list, answers_list):
             answer=answer,
             lesson_quiz=quiz
         )
+    return quiz

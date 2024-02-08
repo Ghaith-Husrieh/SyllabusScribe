@@ -20,6 +20,9 @@ urlpatterns = [
     path('lesson-presentation/<str:pk>', views.get_lesson_presentation, name='get_lesson_presentation'),
     path('lesson-handout/<str:pk>', views.get_lesson_handout, name='get_lesson_handout'),
     path('lesson-quiz/<str:pk>', views.get_lesson_quiz, name='get_lesson_quiz'),
+    path('subject/<str:pk>', views.get_subject, name='get_subject'),
     path('user/edit-info', views.edit_personal_info, name='edit_user'),
-    path('user/change-password', views.change_password, name='change_password')
+    path('user/change-password', views.change_password, name='change_password'),
+    path('create/subject', views.create_subject, name='create_subject'),
+    path('create/unit', views.create_unit, name='create_unit')
 ]

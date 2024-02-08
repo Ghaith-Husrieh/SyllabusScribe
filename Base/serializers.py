@@ -3,7 +3,8 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import (LessonContext, LessonHandout, LessonPlan,
-                     LessonPresentation, LessonQuiz, QuizQA, Subject, User)
+                     LessonPresentation, LessonQuiz, QuizQA, Subject, Unit,
+                     User)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -67,6 +68,24 @@ class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
         exclude = ['user']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['user']
+        return super().create(validated_data)
+
+
+class UnitSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    subject = serializers.PrimaryKeyRelatedField(queryset=Subject.objects.all(), write_only=True, required=True)
+    lesson_plan = serializers.PrimaryKeyRelatedField(read_only=True)
+    lesson_context = serializers.PrimaryKeyRelatedField(read_only=True)
+    lesson_presentation = serializers.PrimaryKeyRelatedField(read_only=True)
+    lesson_handout = serializers.PrimaryKeyRelatedField(read_only=True)
+    lesson_quiz = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Unit
+        fields = '__all__'
 
 
 class LessonPlanSerializer(serializers.ModelSerializer):

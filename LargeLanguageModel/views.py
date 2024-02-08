@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from Base.models import (LessonContext, LessonHandout, LessonPlan,
-                         LessonPresentation)
+                         LessonPresentation, Unit)
 from decorators.log_decorators import log_api_view
 
 from .serializers import (GenerateLessonContextSerializer,
@@ -227,6 +227,14 @@ def llm_generate_presentation(request):
     if isinstance(LLM, LlamaCppChat):
         serializer = GeneratePresentationSerializer(data=request.data)
         if serializer.is_valid():
+            unit = serializer.validated_data.get('unit', None)
+            if unit is not None:
+                try:
+                    unit_to_edit = Unit.objects.get(id=unit)
+                    if unit_to_edit.subject.user != request.user:
+                        return Response({'error': 'Unauthorized access to content'}, status.HTTP_403_FORBIDDEN)
+                except Unit.DoesNotExist:
+                    return Response({'error': 'No unit found with this id'}, status.HTTP_404_NOT_FOUND)
             if ToxicityModelInterface.is_loaded():
                 is_toxic = ToxicityModelInterface.predict_toxicity(serializer.validated_data['topic'])
                 if is_toxic:
@@ -251,6 +259,9 @@ def llm_generate_presentation(request):
                 generated_file=generated_presentation,
                 user=request.user
             )
+            if unit_to_edit:
+                unit_to_edit.lesson_presentation = lesson_presentation_object
+                unit_to_edit.save()
             return Response({'model_output': {
                 'message': 'Presentation generated successfully',
                 'file_path': f'{lesson_presentation_object.generated_file}'
@@ -287,6 +298,14 @@ def llm_generate_lesson_plan(request):
         if serializer.is_valid():
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
+            unit = serializer.validated_data.get('unit', None)
+            if unit is not None:
+                try:
+                    unit_to_edit = Unit.objects.get(id=unit)
+                    if unit_to_edit.subject.user != request.user:
+                        return Response({'error': 'Unauthorized access to content'}, status.HTTP_403_FORBIDDEN)
+                except Unit.DoesNotExist:
+                    return Response({'error': 'No unit found with this id'}, status.HTTP_404_NOT_FOUND)
             if ToxicityModelInterface.is_loaded():
                 is_toxic = ToxicityModelInterface.predict_toxicity(topic)
                 if is_toxic:
@@ -307,6 +326,9 @@ def llm_generate_lesson_plan(request):
                 content=LLM['model_output'],
                 user=request.user
             )
+            if unit_to_edit:
+                unit_to_edit.lesson_plan = lesson_plan_object
+                unit_to_edit.save()
             return Response({'model_output': {
                 'message': 'Lesson plan generated successfully',
                 'generated_content': lesson_plan_object.content
@@ -341,6 +363,14 @@ def llm_generate_quiz(request):
     if isinstance(LLM, LlamaCppChat):
         serializer = GenerateLessonQuizSerializer(data=request.data)
         if serializer.is_valid():
+            unit = serializer.validated_data.get('unit', None)
+            if unit is not None:
+                try:
+                    unit_to_edit = Unit.objects.get(id=unit)
+                    if unit_to_edit.subject.user != request.user:
+                        return Response({'error': 'Unauthorized access to content'}, status.HTTP_403_FORBIDDEN)
+                except Unit.DoesNotExist:
+                    return Response({'error': 'No unit found with this id'}, status.HTTP_404_NOT_FOUND)
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
             if ToxicityModelInterface.is_loaded():
@@ -352,7 +382,10 @@ def llm_generate_quiz(request):
             # TODO: Let the user specify the num_questions
             questions_list = generate_questions(LLM, topic, grade_level, 5)
             answers_list = [generate_answer(LLM, question) for question in questions_list]
-            generate_quiz(request.user, topic, grade_level, questions_list, answers_list)
+            lesson_quiz_object = generate_quiz(request.user, topic, grade_level, questions_list, answers_list)
+            if unit_to_edit:
+                unit_to_edit.lesson_quiz = lesson_quiz_object
+                unit_to_edit.save()
             return Response({'model_output': {
                 'message': 'Quiz generated successfully'
             }
@@ -388,6 +421,14 @@ def llm_generate_context(request):
         if serializer.is_valid():
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
+            unit = serializer.validated_data.get('unit', None)
+            if unit is not None:
+                try:
+                    unit_to_edit = Unit.objects.get(id=unit)
+                    if unit_to_edit.subject.user != request.user:
+                        return Response({'error': 'Unauthorized access to content'}, status.HTTP_403_FORBIDDEN)
+                except Unit.DoesNotExist:
+                    return Response({'error': 'No unit found with this id'}, status.HTTP_404_NOT_FOUND)
             if ToxicityModelInterface.is_loaded():
                 is_toxic = ToxicityModelInterface.predict_toxicity(topic)
                 if is_toxic:
@@ -409,6 +450,9 @@ def llm_generate_context(request):
                 content=extracted_list,
                 user=request.user
             )
+            if unit_to_edit:
+                unit_to_edit.lesson_context = lesson_context_object
+                unit_to_edit.save()
             return Response({'model_output': {
                 'message': 'Context generated successfully',
                 'generated_content': lesson_context_object.content
@@ -445,6 +489,14 @@ def llm_generate_handout(request):
         if serializer.is_valid():
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
+            unit = serializer.validated_data.get('unit', None)
+            if unit is not None:
+                try:
+                    unit_to_edit = Unit.objects.get(id=unit)
+                    if unit_to_edit.subject.user != request.user:
+                        return Response({'error': 'Unauthorized access to content'}, status.HTTP_403_FORBIDDEN)
+                except Unit.DoesNotExist:
+                    return Response({'error': 'No unit found with this id'}, status.HTTP_404_NOT_FOUND)
             if ToxicityModelInterface.is_loaded():
                 is_toxic = ToxicityModelInterface.predict_toxicity(topic)
                 if is_toxic:
@@ -465,6 +517,9 @@ def llm_generate_handout(request):
                 content=LLM['output'],
                 user=request.user
             )
+            if unit_to_edit:
+                unit_to_edit.lesson_handout = lesson_handout_object
+                unit_to_edit.save()
             return Response({'model_output': {
                 'message': 'Handout generated successfully',
                 'generated_content': lesson_handout_object.content

@@ -13,7 +13,8 @@ from .serializers import (ChangePasswordSerializer, EditUserSerializer,
                           LessonContextSerializer, LessonHandoutSerializer,
                           LessonPlanSerializer, LessonPresentationSerializer,
                           LessonQuizSerializer, QuizQASerializer,
-                          SignUpSerializer, SubjectSerializer, UserSerializer)
+                          SignUpSerializer, SubjectSerializer, UnitSerializer,
+                          UserSerializer)
 
 
 @swagger_auto_schema(
@@ -481,6 +482,44 @@ def get_lesson_quiz(request, pk):
 
 # TODO: Add responses to swagger schema
 @swagger_auto_schema(
+    method='GET',
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@log_api_view
+def get_subject(request, pk):
+    try:
+        subject = Subject.objects.get(id=pk)
+    except Subject.DoesNotExist:
+        return Response({'error': 'No results found with this id'}, status.HTTP_404_NOT_FOUND)
+
+    if subject.user == request.user:
+        try:
+            units = subject.unit_set.all()
+        except:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serialized_subject = SubjectSerializer(subject).data
+        serialized_units = UnitSerializer(units, many=True).data
+        serialized_subject['units'] = serialized_units
+
+        return Response({'subject': serialized_subject}, status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Unauthorized access to content'}, status.HTTP_403_FORBIDDEN)
+
+
+# TODO: Add responses to swagger schema
+@swagger_auto_schema(
     method='PUT',
     request_body=EditUserSerializer,
     manual_parameters=[
@@ -529,5 +568,59 @@ def change_password(request):
     if serializer.is_valid():
         serializer.save()
         return Response({'message': 'Password changed successfully'}, status.HTTP_200_OK)
+    else:
+        return Response({'error': serializer.errors}, status.HTTP_400_BAD_REQUEST)
+
+
+# TODO: Add responses to swagger schema
+@swagger_auto_schema(
+    method='POST',
+    request_body=SubjectSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@log_api_view
+def create_subject(request):
+    serializer = SubjectSerializer(data=request.data, context={'user': request.user})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status.HTTP_201_CREATED)
+    else:
+        return Response({'error': serializer.errors}, status.HTTP_400_BAD_REQUEST)
+
+
+# TODO: Add responses to swagger schema
+@swagger_auto_schema(
+    method='POST',
+    request_body=UnitSerializer,
+    manual_parameters=[
+        openapi.Parameter(
+            name="Authorization",
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_STRING,
+            description="Bearer token",
+            required=True,
+            default="Bearer 'your_access_token'",
+        ),
+    ],
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@log_api_view
+def create_unit(request):
+    serializer = UnitSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status.HTTP_201_CREATED)
     else:
         return Response({'error': serializer.errors}, status.HTTP_400_BAD_REQUEST)
