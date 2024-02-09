@@ -22,7 +22,7 @@ class StudentPerformanceModelInterface:
             try:
                 cls._model = load(str(settings.MODELS_ROOT / 'student_performance_ML.joblib'))
                 return OperationResult.SUCCESS
-            except Exception as e:
+            except:
                 return OperationResult.FAILURE
         else:
             return OperationResult.MODEL_ALREADY_LOADED

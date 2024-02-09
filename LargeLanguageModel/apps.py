@@ -9,5 +9,5 @@ class LargelanguagemodelConfig(AppConfig):
     name = 'LargeLanguageModel'
 
     def ready(self):
-        LlamaInterface.load_model()
+        LlamaInterface.load_model(context_length=4096, layers_to_offload=32, verbose=True)
         ToxicityModelInterface.load_model(device='cuda')
