@@ -172,20 +172,20 @@ class UnitFactory(DjangoModelFactory):
 
     @lazy_attribute
     def lesson_plan(self):
-        return LessonPlanFactory(user=None)
+        return LessonPlanFactory(user=self.subject.user)
 
     @lazy_attribute
     def lesson_context(self):
-        return LessonContextFactory(user=None)
+        return LessonContextFactory(user=self.subject.user)
 
     @lazy_attribute
     def lesson_presentation(self):
-        return LessonPresentationFactory(user=None)
+        return LessonPresentationFactory(user=self.subject.user)
 
     @lazy_attribute
     def lesson_handout(self):
-        return LessonHandoutFactory(user=None)
+        return LessonHandoutFactory(user=self.subject.user)
 
     @lazy_attribute
     def lesson_quiz(self):
-        return LessonQuizFactory(user=None)
+        return LessonQuizFactory(user=self.subject.user)

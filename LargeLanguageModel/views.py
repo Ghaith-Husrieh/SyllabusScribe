@@ -228,6 +228,7 @@ def llm_generate_presentation(request):
         serializer = GeneratePresentationSerializer(data=request.data)
         if serializer.is_valid():
             unit = serializer.validated_data.get('unit', None)
+            unit_to_edit = None
             if unit is not None:
                 try:
                     unit_to_edit = Unit.objects.get(id=unit)
@@ -299,6 +300,7 @@ def llm_generate_lesson_plan(request):
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
             unit = serializer.validated_data.get('unit', None)
+            unit_to_edit = None
             if unit is not None:
                 try:
                     unit_to_edit = Unit.objects.get(id=unit)
@@ -364,6 +366,7 @@ def llm_generate_quiz(request):
         serializer = GenerateLessonQuizSerializer(data=request.data)
         if serializer.is_valid():
             unit = serializer.validated_data.get('unit', None)
+            unit_to_edit = None
             if unit is not None:
                 try:
                     unit_to_edit = Unit.objects.get(id=unit)
@@ -422,6 +425,7 @@ def llm_generate_context(request):
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
             unit = serializer.validated_data.get('unit', None)
+            unit_to_edit = None
             if unit is not None:
                 try:
                     unit_to_edit = Unit.objects.get(id=unit)
@@ -490,6 +494,7 @@ def llm_generate_handout(request):
             topic = serializer.validated_data['topic']
             grade_level = serializer.validated_data['grade_level']
             unit = serializer.validated_data.get('unit', None)
+            unit_to_edit = None
             if unit is not None:
                 try:
                     unit_to_edit = Unit.objects.get(id=unit)
