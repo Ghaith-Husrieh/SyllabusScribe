@@ -1,5 +1,6 @@
 from enum import Enum
 
+import pandas as pd
 from django.conf import settings
 from joblib import load
 
@@ -29,5 +30,24 @@ class StudentPerformanceModelInterface:
 
     @classmethod
     @log_function(log_result=False)
-    def get_model(cls):
-        return cls._model
+    def predict_performance_index(cls, hours_studied, previous_score, extracurricular_activities, sleep_hours, sample_question_papers_practiced):
+        model_input = pd.DataFrame(
+            [[
+                hours_studied,
+                previous_score,
+                extracurricular_activities,
+                sleep_hours,
+                sample_question_papers_practiced
+            ]],
+            columns=['Hours Studied', 'Previous Scores', 'Extracurricular Activities',
+                     'Sleep Hours', 'Sample Question Papers Practiced']
+        )
+        return cls._model.predict(model_input)
+
+    @classmethod
+    @log_function(log_result=False)
+    def is_loaded(cls):
+        if cls._model is not None:
+            return True
+        else:
+            return False

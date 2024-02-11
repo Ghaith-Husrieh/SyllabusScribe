@@ -1,4 +1,3 @@
-import pandas as pd
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -113,22 +112,16 @@ from .utils.student_performance_model_interface import \
 @permission_classes((IsAuthenticated,))
 @log_api_view
 def student_performance_model_query(request):
-    student_performance_model = StudentPerformanceModelInterface.get_model()
-    if student_performance_model is not None:
+    if StudentPerformanceModelInterface.is_loaded():
         serializer = StudentPerformanceSerializer(data=request.data)
         if serializer.is_valid():
-            model_input = pd.DataFrame(
-                [[
-                    serializer.validated_data['hours_studied'],
-                    serializer.validated_data['previous_score'],
-                    serializer.validated_data['extracurricular_activities'],
-                    serializer.validated_data['sleep_hours'],
-                    serializer.validated_data['sample_question_papers_practiced']
-                ]],
-                columns=['Hours Studied', 'Previous Scores', 'Extracurricular Activities',
-                         'Sleep Hours', 'Sample Question Papers Practiced']
+            performance_index = StudentPerformanceModelInterface.predict_performance_index(
+                serializer.validated_data['hours_studied'],
+                serializer.validated_data['previous_score'],
+                serializer.validated_data['extracurricular_activities'],
+                serializer.validated_data['sleep_hours'],
+                serializer.validated_data['sample_question_papers_practiced']
             )
-            performance_index = student_performance_model.predict(model_input)
             output_serializer = PerformanceIndexSerializer(data={'performance_index': performance_index[0]})
             if output_serializer.is_valid():
                 return Response({'model_output': {'performance_index': output_serializer.validated_data['performance_index']}}, status=status.HTTP_200_OK)
