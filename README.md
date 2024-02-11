@@ -18,7 +18,7 @@ Welcome to SyllabusScribe, the comprehensive educational platform designed to si
 
 ## Installation Instructions:
 
-1. Create a New Python environment and Activate it **(optional but recommended)**:
+1. **Create a New Python environment and Activate it (optional but recommended):**
 
    **Windows:**
 
@@ -38,14 +38,14 @@ Welcome to SyllabusScribe, the comprehensive educational platform designed to si
 
    If you wish to leverage GPU acceleration for improved performance in llama-cpp-python, ensure that your environment is configured as follows before proceeding with Step 2. Although the primary execution occurs on the CPU, this setup enables the option to offload computations to the GPU for faster processing.
 
-   - Install Visual Studio Community Edition (Free) or Any Other Version:<br>
+   - **Install Visual Studio Community Edition (Free) or Any Other Version:**<br>
      [Download Visual Studio](https://visualstudio.microsoft.com/downloads/) from the official Visual Studio website.<br>
      During installation, make sure to select the "Desktop development with C++" workload.<br>
 
-   - Download and Install the CUDA Toolkit:<br>
+   - **Download and Install the CUDA Toolkit:**<br>
      [Download the CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) from the official NVIDIA website and follow the installation instructions.<br>
 
-   - Download and Install CMake:<br>
+   - **Download and Install CMake**:<br>
      [Download CMake](https://cmake.org/download/) from the official CMake website and follow the installation instructions.<br>
 
    - Open a PowerShell terminal.
@@ -68,11 +68,27 @@ Welcome to SyllabusScribe, the comprehensive educational platform designed to si
      $env:CUDAToolkit_ROOT = 'C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.2'
      ```
 
-2. Download dependencies: `pip install -r requirements.txt`
-3. Setup the database:
+2. **Download dependencies:**
+
+   ```powershell
+   pip install -r requirements.txt
+   ```
+
+3. **Setup the database:**<br>
    We're currently using a mysql database, make sure to configure your own database within the _settings.py_ file and then migrating.<br>
    (**WARNING**: you might need to delete all migration files before migrating to your new database)
-4. You're good to go!
+
+4. **Setup environment variables:**<br>
+   Create a '.env' file in the base directory of the project containing the following fields:
+
+   - `DB_USER`: Your database username.
+   - `DB_PASSWORD`: Your database password.
+   - `SECRET_KEY`: A secret key for your application. Ensure this key is kept secure and not shared publicly.
+
+5. **Setup log file:**<br>
+   Create the 'SyllabusScribe.log' file within the /logs directory
+
+6. **You're good to go!**
 
 ## Additional Information:
 
